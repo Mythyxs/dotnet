@@ -1,0 +1,9 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local set = player:WaitForChild("Backpack"):WaitForChild("PlayerValues"):WaitForChild("InScreen"):WaitForChild("set")
+set.Value = true
+set:GetPropertyChangedSignal("Value"):Connect(function()
+    if not set.Value then
+        set.Value = true
+    end
+end)
