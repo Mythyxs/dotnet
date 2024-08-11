@@ -1,5 +1,6 @@
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
 -- Define the desired walk speeds
 local normalSpeed = 11
@@ -45,20 +46,12 @@ local function onCharacterAdded(character)
     local humanoid = character:WaitForChild("Humanoid")
     adjustSpeed(humanoid) -- Apply initial speed setting based on current flag state
 
-    -- Keep adjusting the speed when it changes externally
-    humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-        if not adjustingSpeed then
-            adjustSpeed(humanoid)
-        end
-    end)
-
     -- Continuously enforce the walk speed
-    while true do
-        wait(0.1)  -- Adjust the frequency as needed
+    runService.RenderStepped:Connect(function()
         if humanoid then
             adjustSpeed(humanoid)
         end
-    end
+    end)
 end
 
 -- Connecting the character added signal to handle respawns
