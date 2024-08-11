@@ -1,8 +1,7 @@
--- END key to disable
--- make ur player face someone then press RB
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 local trackedPlayer = nil
@@ -110,7 +109,8 @@ local function checkAndFireEvent()
 end
 
 -- Run the tracking and check periodically
-while running do
-    checkAndFireEvent()
-    wait(0.1)  -- Adjust the wait time as needed
-end
+RunService.Heartbeat:Connect(function()
+    if running then
+        checkAndFireEvent()
+    end
+end)
