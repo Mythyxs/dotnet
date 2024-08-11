@@ -1,7 +1,6 @@
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 
--- Create GUI for Current Jump Power
 local screenGui = Instance.new("ScreenGui", player.PlayerGui)
 local jumpPowerLabel = Instance.new("TextLabel", screenGui)
 jumpPowerLabel.AnchorPoint = Vector2.new(0.5, 0.5)  -- Set anchor point to the center of the label
@@ -9,12 +8,12 @@ jumpPowerLabel.Position = UDim2.new(0.5, 0, 0.3, 0)  -- Position the label on th
 jumpPowerLabel.Size = UDim2.new(0, 200, 0, 50)
 jumpPowerLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 jumpPowerLabel.BackgroundTransparency = 0.5
-jumpPowerLabel.TextColor3 = Color3.new(1, 1, 1)  -- Initial text color set to white
+jumpPowerLabel.TextColor3 = Color3.new(1, 1, 1)  
 jumpPowerLabel.Font = Enum.Font.SourceSans
 jumpPowerLabel.TextSize = 24
 jumpPowerLabel.Text = "Jump Power: Calculating..."
 
--- Toggle GUI visibility and handle deletion
+
 local guiVisible = true
 userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent then
@@ -27,12 +26,12 @@ userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     end
 end)
 
--- Update Current Jump Power in GUI and change text color based on jump power
+
 local function updateJumpPower(humanoid)
     local jumpPower = humanoid.JumpPower
     jumpPowerLabel.Text = "Jump Power: " .. jumpPower
 
-    -- Set color based on jump power value
+    
     if jumpPower >= 100 then
         jumpPowerLabel.TextColor3 = Color3.new(1, 0, 0)  -- Red for jump power 100 and above
     elseif jumpPower >= 50 and jumpPower < 100 then
@@ -42,23 +41,23 @@ local function updateJumpPower(humanoid)
     end
 end
 
--- Handle the character and continuous updates
+
 local function onCharacterAdded(character)
     local humanoid = character:WaitForChild("Humanoid")
 
-    -- Initial jump power update
+    
     updateJumpPower(humanoid)
 
-    -- Continuous jump power updates
+    
     humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
         updateJumpPower(humanoid)
     end)
 end
 
--- Connect the character added signal
+
 player.CharacterAdded:Connect(onCharacterAdded)
 
--- Handle current character, if it exists
+
 if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
     onCharacterAdded(player.Character)
 end
