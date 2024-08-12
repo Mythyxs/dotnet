@@ -6,7 +6,7 @@ local runService = game:GetService("RunService")
 local normalSpeed = 11
 local shiftSpeed = 13.5
 local gSpeedInPost = 9
-local gSpeedNotInPost = 11.5
+local gSpeedNotInPost = 12
 local fSpeed = 4.3
 
 -- Variable to prevent re-entry loop
