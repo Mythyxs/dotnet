@@ -1,0 +1,90 @@
+import os
+import requests
+import asyncio
+import discord
+from multiprocessing import Process
+
+# Fetch bot details from environment variables
+bots = [
+    { # Shem AI
+        'token': os.getenv('SHEM_AI_TOKEN'),
+        'application_id': '1272188564259602525',
+        'bio': 'created by shemxz.'
+    },
+    { # CBA AI
+        'token': os.getenv('CBA_AI_TOKEN'),
+        'application_id': '1272219906666004530',
+        'bio': 'created by shemxz.'
+    },
+    { # Lua AI
+        'token': os.getenv('LUA_AI_TOKEN'),
+        'application_id': '1272362316838600806',
+        'bio': 'created & trained by shemxz.'
+    },
+    { # Matoka AI
+        'token': os.getenv('MATOKA_AI_TOKEN'),
+        'application_id': '1273126611738427442',
+        'bio': 'created by shemxz.'
+    }
+]
+
+def get_headers(token):
+    return {
+        'Authorization': f'Bot {token}',
+        'Content-Type': 'application/json'
+    }
+
+async def get_current_description(token, application_id):
+    api_url = f'https://discord.com/api/v10/applications/{application_id}'
+    headers = get_headers(token)
+    response = requests.get(api_url, headers=headers)
+    if response.status_code == 200:
+        return response.json().get('description', '')
+    else:
+        print(f"Failed to fetch current description for bot with token {token}. Status code: {response.status_code}, Response: {response.text}")
+        return None
+
+async def update_description(token, application_id, description):
+    api_url = f'https://discord.com/api/v10/applications/{application_id}'
+    headers = get_headers(token)
+    payload = {
+        'description': description
+    }
+    response = requests.patch(api_url, headers=headers, json=payload)
+    if response.status_code == 200:
+        print(f"Description updated to '{description}' for bot with token {token}")
+    else:
+        print(f"Failed to update description for bot with token {token}. Status code: {response.status_code}, Response: {response.text}")
+
+async def bot_worker(token, application_id, bio):
+    intents = discord.Intents.default()
+    client = discord.Client(intents=intents)
+
+    @client.event
+    async def on_ready():
+        print(f'Logged in as {client.user.name}')
+        while True:
+            try:
+                current_description = await get_current_description(token, application_id)
+                if current_description is not None and current_description != bio:
+                    await update_description(token, application_id, bio)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            await asyncio.sleep(1)  # Increase the interval to 60 seconds
+
+    await client.start(token)
+
+def run_bot(token, application_id, bio):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(bot_worker(token, application_id, bio))
+
+if __name__ == '__main__':
+    processes = []
+    for bot in bots:
+        p = Process(target=run_bot, args=(bot['token'], bot['application_id'], bot['bio']))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
