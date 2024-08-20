@@ -35,11 +35,11 @@ end
 
 -- Handle user input
 userInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.DPadUp then
+    if input.KeyCode == Enum.KeyCode.DPadRight then
         adjustSize(0.1)
-    elseif input.KeyCode == Enum.KeyCode.DPadDown then
-        adjustSize(-0.1)
     elseif input.KeyCode == Enum.KeyCode.DPadLeft then
+        adjustSize(-0.1)
+    elseif input.KeyCode == Enum.KeyCode.DPadUp then
         -- Set size back to default when DPadLeft is pressed
         currentSize = defaultSize
         setSoccerBallSize(defaultSize)
