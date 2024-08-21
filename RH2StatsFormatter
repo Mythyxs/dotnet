@@ -1,0 +1,181 @@
+def get_team_name(team_number):
+    return input(f"Enter Team {team_number} Name: ")
+
+def get_team_players(team_name):
+    return input(f"List players for {team_name} (separated by commas): ").split(',')
+
+def get_stat_for_category_and_quarter(player, team, quarter, category):
+    while True:
+        stat_input = input(f"Enter {category} for {player} on {team} for Q{quarter}: ")
+        if stat_input.lower() == 'back':
+            return 'back'
+        elif stat_input.isdigit():
+            return int(stat_input)
+        else:
+            print("Invalid input. Please enter a number.")
+
+def get_fraction_stat_for_category_and_quarter(player, team, quarter, category):
+    while True:
+        stat_input = input(f"Enter {category} (format x/y) for {player} on {team} for Q{quarter}: ")
+        if stat_input.lower() == 'back':
+            return 'back'
+        try:
+            made, attempted = map(int, stat_input.split('/'))
+            return made, attempted
+        except ValueError:
+            print("Invalid input. Please enter the fraction in format x/y.")
+
+def collect_team_stats(team_name, team_players, num_quarters):
+    team_stats = {player: [] for player in team_players}
+    stat_categories = ['Points', 'Assists', 'Rebounds', 'Steals', 'Blocks', 'FGM/A', '3PM/A']
+    history = []
+    quarter = 1
+    category_index = 0
+    player_index = 0
+
+    while quarter <= num_quarters:
+        if category_index == 0 and player_index == 0:
+            for player in team_players:
+                if len(team_stats[player]) < quarter:
+                    team_stats[player].append({})
+        player = team_players[player_index]
+        category = stat_categories[category_index]
+        
+        if category in ['FGM/A', '3PM/A']:
+            stat = get_fraction_stat_for_category_and_quarter(player, team_name, quarter, category)
+            if stat == 'back':
+                if history:
+                    quarter, category_index, player_index = history.pop()
+                    continue
+                else:
+                    print("No previous entry to go back to.")
+                    continue
+            else:
+                made, attempted = stat
+                if category == 'FGM/A':
+                    team_stats[player][quarter - 1]['FGM'] = made
+                    team_stats[player][quarter - 1]['FGA'] = attempted
+                else:
+                    team_stats[player][quarter - 1]['3PM'] = made
+                    team_stats[player][quarter - 1]['3PA'] = attempted
+        else:
+            stat = get_stat_for_category_and_quarter(player, team_name, quarter, category)
+            if stat == 'back':
+                if history:
+                    quarter, category_index, player_index = history.pop()
+                    continue
+                else:
+                    print("No previous entry to go back to.")
+                    continue
+            else:
+                team_stats[player][quarter - 1][category] = stat
+        
+        history.append((quarter, category_index, player_index))
+        player_index += 1
+        
+        if player_index == len(team_players):
+            player_index = 0
+            category_index += 1
+            if category_index == len(stat_categories):
+                category_index = 0
+                quarter += 1
+
+    for player in team_players:
+        for quarter in range(1, num_quarters + 1):
+            if '2PM' not in team_stats[player][quarter - 1]:
+                team_stats[player][quarter - 1]['2PM'] = team_stats[player][quarter - 1]['FGM'] - team_stats[player][quarter - 1]['3PM']
+                team_stats[player][quarter - 1]['2PA'] = team_stats[player][quarter - 1]['FGA'] - team_stats[player][quarter - 1]['3PA']
+    
+    return team_stats
+
+def aggregate_stats(player_stats):
+    aggregated = {'Points': 0, 'Assists': 0, 'Rebounds': 0, 'Steals': 0, 'Blocks': 0, '2PM': 0, '2PA': 0, '3PM': 0, '3PA': 0}
+    for quarter_stats in player_stats:
+        if isinstance(quarter_stats, dict):
+            aggregated['Points'] += quarter_stats.get('Points', 0)
+            aggregated['Assists'] += quarter_stats.get('Assists', 0)
+            aggregated['Rebounds'] += quarter_stats.get('Rebounds', 0)
+            aggregated['Steals'] += quarter_stats.get('Steals', 0)
+            aggregated['Blocks'] += quarter_stats.get('Blocks', 0)
+            aggregated['2PM'] += quarter_stats.get('2PM', 0)
+            aggregated['2PA'] += quarter_stats.get('2PA', 0)
+            aggregated['3PM'] += quarter_stats.get('3PM', 0)
+            aggregated['3PA'] += quarter_stats.get('3PA', 0)
+    return aggregated
+
+def print_statsheet(team_name, team_stats):
+    print(f"\n{team_name} Stats:")
+    total_stats = {'Points': 0, 'Assists': 0, 'Rebounds': 0, 'Steals': 0, 'Blocks': 0, '2PM': 0, '2PA': 0, '3PM': 0, '3PA': 0}
+
+    for player, stats in team_stats.items():
+        if isinstance(stats, list):
+            aggregated = aggregate_stats(stats)
+            print(f"{player}: | {aggregated['Points']} PTS | {aggregated['Assists']} AST | {aggregated['Rebounds']} REB | "
+                  f"{aggregated['Steals']} STL | {aggregated['Blocks']} BLK | 2P: {aggregated['2PM']}/{aggregated['2PA']} | "
+                  f"3P: {aggregated['3PM']}/{aggregated['3PA']} |")
+            
+            # Add to total stats
+            total_stats['Points'] += aggregated['Points']
+            total_stats['Assists'] += aggregated['Assists']
+            total_stats['Rebounds'] += aggregated['Rebounds']
+            total_stats['Steals'] += aggregated['Steals']
+            total_stats['Blocks'] += aggregated['Blocks']
+            total_stats['2PM'] += aggregated['2PM']
+            total_stats['2PA'] += aggregated['2PA']
+            total_stats['3PM'] += aggregated['3PM']
+            total_stats['3PA'] += aggregated['3PA']
+    
+    # Print the total stats
+    print(f"Total: {total_stats['Points']} PTS | {total_stats['Assists']} AST | {total_stats['Rebounds']} REB | "
+          f"{total_stats['Steals']} STL | {total_stats['Blocks']} BLK | "
+          f"2P: {total_stats['2PM']}/{total_stats['2PA']} | 3P: {total_stats['3PM']}/{total_stats['3PA']} |")
+
+def main():
+    print("created by shemxz.")
+    print("helpful command: 'back' (lets you go back to previous stat if you messed up)")
+    while True:
+        start_command = input("type 'start' when you are ready to begin: ").strip().lower()
+        if start_command == 'start':
+            try:
+                num_quarters = int(input("Enter the number of quarters: ").strip())
+                team1_name = get_team_name(1)
+                team2_name = get_team_name(2)
+                team1_players = get_team_players(team1_name)
+                team2_players = get_team_players(team2_name)
+                team1_stats = collect_team_stats(team1_name, team1_players, num_quarters)
+                team2_stats = collect_team_stats(team2_name, team2_players, num_quarters)
+                break
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
+
+    while True:
+        user_input = input("Would you like to add anything else? (nah/addplayer/exit): ").strip().lower()
+        if user_input == 'nah' or user_input == 'exit':
+            print_statsheet(team1_name, team1_stats)
+            print_statsheet(team2_name, team2_stats)
+            break
+        elif user_input == 'addplayer':
+            try:
+                new_player = input("Enter name for new player: ").strip()
+                team_for_new_player = input("Enter team for new player: ").strip()
+                if team_for_new_player == team1_name:
+                    new_stats = collect_team_stats(team_for_new_player, [new_player], num_quarters)
+                    team1_stats.update(new_stats)
+                elif team_for_new_player == team2_name:
+                    new_stats = collect_team_stats(team_for_new_player, [new_player], num_quarters)
+                    team2_stats.update(new_stats)
+                else:
+                    print(f"Team '{team_for_new_player}' not found. Please enter a valid team name.")
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
+        else:
+            print("Invalid input. Please type 'nah', 'addplayer', or 'exit'.")
+
+if __name__ == "__main__":
+    main()
+
+# Add this at the end of your script
+
+input("Press Enter to exit...")
