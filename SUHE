@@ -1,8 +1,4 @@
-Dpad Up = +0.1 Hitbox Size
-Dpad Down = -0.1 Hitbox Size
-Dpad Left = Reset to 3,3,3 (Default)
-
--- Script to adjust the hitbox size of the SoccerBall with DPadUp and DPadDown
+-- Script to adjust the hitbox size of the SoccerBall with DPadUp, DPadDown, and DPadLeft or arrow keys
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local soccerBall = replicatedStorage:WaitForChild("SoccerBall")
@@ -35,12 +31,12 @@ end
 
 -- Handle user input
 userInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.DPadRight then
+    if input.KeyCode == Enum.KeyCode.DPadRight or input.KeyCode == Enum.KeyCode.Up then
         adjustSize(0.1)
-    elseif input.KeyCode == Enum.KeyCode.DPadLeft then
+    elseif input.KeyCode == Enum.KeyCode.DPadLeft or input.KeyCode == Enum.KeyCode.Down then
         adjustSize(-0.1)
-    elseif input.KeyCode == Enum.KeyCode.DPadUp then
-        -- Set size back to default when DPadLeft is pressed
+    elseif input.KeyCode == Enum.KeyCode.DPadUp or input.KeyCode == Enum.KeyCode.Left then
+        -- Set size back to default when DPadLeft or Left arrow is pressed
         currentSize = defaultSize
         setSoccerBallSize(defaultSize)
     end
