@@ -29,6 +29,28 @@ local function adjustSize(amount)
     setSoccerBallSize(currentSize)
 end
 
+-- Function to display text in the middle of the screen
+local function displayText()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(0, 400, 0, 100)
+    textLabel.Position = UDim2.new(0.5, -200, 0.5, -50)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 48
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.Text = "hello little rokky cumsluts, tell me what to add"
+    textLabel.Parent = screenGui
+
+    -- Remove the text after 5 seconds
+    game.Debris:AddItem(screenGui, 5)
+end
+
+-- Display the text when the script is executed
+displayText()
+
 -- Handle user input
 userInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.DPadRight or input.KeyCode == Enum.KeyCode.Up then
