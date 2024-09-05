@@ -1,1 +1,43 @@
+-- Script to adjust the hitbox size of the SoccerBall with DPadUp, DPadDown, and DPadLeft or arrow keys
 
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local soccerBall = replicatedStorage:WaitForChild("SoccerBall")
+
+-- Default size of the SoccerBall
+local defaultSize = Vector3.new(3, 3, 3)
+
+-- Function to set SoccerBall size
+local function setSoccerBallSize(size)
+    if soccerBall:IsA("BasePart") then
+        soccerBall.Size = size
+    else
+        warn("SoccerBall is not a valid BasePart.")
+    end
+end
+
+-- Initial size of the SoccerBall
+setSoccerBallSize(defaultSize)
+
+local userInputService = game:GetService("UserInputService")
+
+-- Variables to track current size
+local currentSize = defaultSize
+
+-- Function to adjust size
+local function adjustSize(amount)
+    currentSize = currentSize + Vector3.new(amount, amount, amount)
+    setSoccerBallSize(currentSize)
+end
+
+-- Handle user input
+userInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.DPadRight or input.KeyCode == Enum.KeyCode.Up then
+        adjustSize(0.1)
+    elseif input.KeyCode == Enum.KeyCode.DPadLeft or input.KeyCode == Enum.KeyCode.Down then
+        adjustSize(-0.1)
+    elseif input.KeyCode == Enum.KeyCode.DPadUp or input.KeyCode == Enum.KeyCode.Left then
+        -- Set size back to default when DPadLeft or Left arrow is pressed
+        currentSize = defaultSize
+        setSoccerBallSize(defaultSize)
+    end
+end)
