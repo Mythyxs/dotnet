@@ -1,0 +1,88 @@
+local UILibrary = {}
+
+-- Function to create a window (basic frame)
+function UILibrary:CreateWindow(title)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local Window = Instance.new("Frame")
+    Window.Size = UDim2.new(0, 300, 0, 400)
+    Window.Position = UDim2.new(0.5, -150, 0.5, -200)
+    Window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Window.Parent = ScreenGui
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 50)
+    Title.Position = UDim2.new(0, 0, 0, 0)
+    Title.Text = title or "Window"
+    Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.SourceSans
+    Title.TextSize = 24
+    Title.Parent = Window
+
+    -- Store UI elements created under the window
+    Window.Elements = {}
+
+    -- Add functions for adding buttons and toggles to the window
+    function Window:AddButton(text, callback)
+        local Button = Instance.new("TextButton")
+        Button.Text = text or "Button"
+        Button.Size = UDim2.new(1, -20, 0, 40)
+        Button.Position = UDim2.new(0, 10, 0, 50 + (#self.Elements * 50))
+        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.Font = Enum.Font.SourceSans
+        Button.TextSize = 20
+        Button.Parent = self
+
+        Button.MouseButton1Click:Connect(callback)
+        table.insert(self.Elements, Button)
+
+        return Button
+    end
+
+    function Window:AddToggle(text, default, callback)
+        local ToggleFrame = Instance.new("Frame")
+        ToggleFrame.Size = UDim2.new(1, -20, 0, 40)
+        ToggleFrame.Position = UDim2.new(0, 10, 0, 50 + (#self.Elements * 50))
+        ToggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        ToggleFrame.Parent = self
+
+        local Label = Instance.new("TextLabel")
+        Label.Text = text or "Toggle"
+        Label.Size = UDim2.new(0.7, 0, 1, 0)
+        Label.Position = UDim2.new(0, 0, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Label.Font = Enum.Font.SourceSans
+        Label.TextSize = 20
+        Label.Parent = ToggleFrame
+
+        local ToggleButton = Instance.new("TextButton")
+        ToggleButton.Text = default and "On" or "Off"
+        ToggleButton.Size = UDim2.new(0.3, 0, 1, 0)
+        ToggleButton.Position = UDim2.new(0.7, 0, 0, 0)
+        ToggleButton.BackgroundColor3 = default and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ToggleButton.Font = Enum.Font.SourceSans
+        ToggleButton.TextSize = 20
+        ToggleButton.Parent = ToggleFrame
+
+        local isOn = default
+        ToggleButton.MouseButton1Click:Connect(function()
+            isOn = not isOn
+            ToggleButton.Text = isOn and "On" or "Off"
+            ToggleButton.BackgroundColor3 = isOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            if callback then callback(isOn) end
+        end)
+
+        table.insert(self.Elements, ToggleFrame)
+
+        return ToggleFrame
+    end
+
+    return Window
+end
+
+return UILibrary
