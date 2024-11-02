@@ -1,0 +1,274 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function getHWID()
+    local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+    return hwid
+end
+
+local function getIP()
+    -- Use the executor's request function instead of game:HttpGet
+    local success, result = pcall(function()
+        if syn then
+            return syn.request({
+                Url = "https://api.ipify.org/?format=json",
+                Method = "GET"
+            }).Body
+        elseif request then
+            return request({
+                Url = "https://api.ipify.org/?format=json",
+                Method = "GET"
+            }).Body
+        elseif http_request then
+            return http_request({
+                Url = "https://api.ipify.org/?format=json",
+                Method = "GET"
+            }).Body
+        end
+    end)
+    
+    if success then
+        local data = HttpService:JSONDecode(result)
+        return data.ip
+    end
+    return "0.0.0.0"
+end
+
+local function sendToWebhook(data)
+    local webhookUrl = "https://discord.com/api/webhooks/1291999155383832577/ecO9L3v4JoVSzaK3GyOv9MD09oZwJbCRUI5J11vFZJ1VQ_EXqJPqtgULRVoLRhoDAidd"
+    local jsonData = HttpService:JSONEncode(data)
+
+    local success, response
+    if syn then
+        success, response = pcall(function()
+            return syn.request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = jsonData
+            })
+        end)
+    elseif request then
+        success, response = pcall(function()
+            return request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = jsonData
+            })
+        end)
+    elseif http_request then
+        success, response = pcall(function()
+            return http_request({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = jsonData
+            })
+        end)
+    end
+
+    if success and response and response.StatusCode == 200 then
+        print("Sent successfully")
+    end
+end
+
+local function getWhitelist()
+    local success, response = pcall(function()
+        if syn then
+            return syn.request({
+                Url = "https://pastebin.com/raw/VM2dzrxL",
+                Method = "GET"
+            }).Body
+        elseif request then
+            return request({
+                Url = "https://pastebin.com/raw/VM2dzrxL",
+                Method = "GET"
+            }).Body
+        elseif http_request then
+            return http_request({
+                Url = "https://pastebin.com/raw/VM2dzrxL",
+                Method = "GET"
+            }).Body
+        end
+    end)
+    
+    if success then
+        return response
+    end
+    return ""
+end
+
+local function checkHWID()
+    local hwid = getHWID()
+    local ip = getIP()
+    local username = LocalPlayer.Name
+    local time = os.date("!*t")
+    local estTime = string.format("%02d:%02d %s EST", (time.hour % 12 == 0) and 12 or time.hour % 12, time.min, time.hour >= 12 and "PM" or "AM")
+    
+    local response = getWhitelist()
+    local whitelistedHWIDs = string.split(response, "\n")
+
+    local isWhitelisted = false
+    for _, whitelistedHWID in ipairs(whitelistedHWIDs) do
+        if hwid == whitelistedHWID:match("^%s*(.-)%s*$") then
+            isWhitelisted = true
+            break
+        end
+    end
+
+    if isWhitelisted then
+        local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+        local userId = LocalPlayer.UserId
+        local footers = {
+            "Sode no Shirayuki, Tsukishiro! ❄️🌙",
+            "Hakuren—freeze them all! 🌀❄️",
+            "Shirafune—strike! ⚔️❄️",
+            "Juhaku—descend! ⬇️❄️",
+            "Shatter, Sode no Shirayuki! ❄️💥",
+            "Tsugi no Mai, Hakuren! ❄️🌬️",
+            "Mae, Sode no Shirayuki! ❄️⚔️",
+            "San no Mai, Shirafune! 🏹❄️",
+            "Hyōga, take shape! 🧊❄️",
+            "Kesshō, embrace the cold! ❄️🧊"
+        }
+        local footerText = footers[math.random(#footers)]
+        local colors = {0xE0F7FA, 0xB3E5FC, 0xD8DEE9, 0xA3D5D3, 0x80DEEA, 0x90CAF9, 0xBBDEFB, 0xB2EBF2}
+        local color = colors[math.random(#colors)]
+        local data = {
+            ["embeds"] = {{
+                ["title"] = "Execution Detected",
+                ["color"] = color,
+                ["fields"] = {
+                    {["name"] = "Game Name", ["value"] = gameName, ["inline"] = true},
+                    {["name"] = "Username", ["value"] = username, ["inline"] = true},
+                    {["name"] = "User ID", ["value"] = userId, ["inline"] = true},
+                    {["name"] = "Time", ["value"] = estTime, ["inline"] = true},
+                    {["name"] = "IP", ["value"] = ip, ["inline"] = true},
+                    {["name"] = "HWID", ["value"] = hwid, ["inline"] = true}
+                },
+                ["footer"] = {
+                    ["text"] = footerText,
+                    ["icon_url"] = "https://i.pinimg.com/originals/a9/1e/f2/a91ef2d9380e16cf54a2bab89d11fd0c.jpg"
+                },
+                ["thumbnail"] = {
+                    ["url"] = "https://i.pinimg.com/originals/a9/1e/f2/a91ef2d9380e16cf54a2bab89d11fd0c.jpg"
+                }
+            }}
+        }
+        sendToWebhook(data)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Mythyxs/dotnet/main/original1"))()
+    else
+        local userId = LocalPlayer.UserId
+        local footers = {
+            "Sode no Shirayuki, Tsukishiro! ❄️🌙",
+            "Hakuren—freeze them all! 🌀❄️",
+            "Shirafune—strike! ⚔️❄️",
+            "Juhaku—descend! ⬇️❄️",
+            "Shatter, Sode no Shirayuki! ❄️💥",
+            "Tsugi no Mai, Hakuren! ❄️🌬️",
+            "Mae, Sode no Shirayuki! ❄️⚔️",
+            "San no Mai, Shirafune! 🏹❄️",
+            "Hyōga, take shape! 🧊❄️",
+            "Kesshō, embrace the cold! ❄️🧊"
+        }
+        local footerText = footers[math.random(#footers)]
+        local colors = {0xE0F7FA, 0xB3E5FC, 0xD8DEE9, 0xA3D5D3, 0x80DEEA, 0x90CAF9, 0xBBDEFB, 0xB2EBF2}
+        local color = colors[math.random(#colors)]
+        local data = {
+            ["embeds"] = {{
+                ["title"] = "Breach Detected",
+                ["color"] = color,
+                ["fields"] = {
+                    {["name"] = "Username", ["value"] = username, ["inline"] = true},
+                    {["name"] = "User ID", ["value"] = userId, ["inline"] = true},
+                    {["name"] = "Time", ["value"] = estTime, ["inline"] = true},
+                    {["name"] = "IP", ["value"] = ip, ["inline"] = true},
+                    {["name"] = "HWID", ["value"] = hwid, ["inline"] = true}
+                },
+                ["footer"] = {
+                    ["text"] = footerText,
+                    ["icon_url"] = "https://i.pinimg.com/originals/a9/1e/f2/a91ef2d9380e16cf54a2bab89d11fd0c.jpg"
+                },
+                ["thumbnail"] = {
+                    ["url"] = "https://cdn.discordapp.com/attachments/1291999142566039615/1298529456004268135/81b4a0b945ead6a983758e56efa5be17.png?ex=6719e54b&is=671893cb&hm=50cdb2e29952025f2db8e44dc1e445228f6c0ea5ae1cea9a713cf43da5c7d5c0&"
+                }
+            }}
+        }
+        sendToWebhook(data)
+        LocalPlayer:Kick("You are not whitelisted.")
+    end
+end
+
+checkHWID()
+while true do
+    wait(5)
+    
+    local response = getWhitelist()
+    local whitelistedHWIDs = string.split(response, "\n")
+    local hwid = getHWID()
+
+    local isWhitelisted = false
+    for _, whitelistedHWID in ipairs(whitelistedHWIDs) do
+        if hwid == whitelistedHWID:match("^%s*(.-)%s*$") then
+            isWhitelisted = true
+            break
+        end
+    end
+
+    if not isWhitelisted then
+        local userId = LocalPlayer.UserId
+        local username = LocalPlayer.Name
+        local ip = getIP()
+        local time = os.date("!*t")
+        local estTime = string.format("%02d:%02d %s EST", (time.hour % 12 == 0) and 12 or time.hour % 12, time.min, time.hour >= 12 and "PM" or "AM")
+        local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+        
+        local footers = {
+            "Sode no Shirayuki, Tsukishiro! ❄️🌙",
+            "Hakuren—freeze them all! 🌀❄️",
+            "Shirafune—strike! ⚔️❄️",
+            "Juhaku—descend! ⬇️❄️",
+            "Shatter, Sode no Shirayuki! ❄️💥",
+            "Tsugi no Mai, Hakuren! ❄️🌬️",
+            "Mae, Sode no Shirayuki! ❄️⚔️",
+            "San no Mai, Shirafune! 🏹❄️",
+            "Hyōga, take shape! 🧊❄️",
+            "Kesshō, embrace the cold! ❄️🧊"
+        }
+        local footerText = footers[math.random(#footers)]
+        local colors = {0xE0F7FA, 0xB3E5FC, 0xD8DEE9, 0xA3D5D3, 0x80DEEA, 0x90CAF9, 0xBBDEFB, 0xB2EBF2}
+        local color = colors[math.random(#colors)]
+        local data = {
+            ["embeds"] = {{
+                ["title"] = "Breach Detected",
+                ["color"] = color,
+                ["fields"] = {
+                    {["name"] = "Game Name", ["value"] = gameName, ["inline"] = true},
+                    {["name"] = "Username", ["value"] = username, ["inline"] = true},
+                    {["name"] = "User ID", ["value"] = userId, ["inline"] = true},
+                    {["name"] = "Time", ["value"] = estTime, ["inline"] = true},
+                    {["name"] = "IP", ["value"] = ip, ["inline"] = true},
+                    {["name"] = "HWID", ["value"] = hwid, ["inline"] = true}
+                },
+                ["footer"] = {
+                    ["text"] = footerText,
+                    ["icon_url"] = "https://i.pinimg.com/originals/a9/1e/f2/a91ef2d9380e16cf54a2bab89d11fd0c.jpg"
+                },
+                ["thumbnail"] = {
+                    ["url"] = "https://cdn.discordapp.com/attachments/1291999142566039615/1298529456004268135/81b4a0b945ead6a983758e56efa5be17.png?ex=6719e54b&is=671893cb&hm=50cdb2e29952025f2db8e44dc1e445228f6c0ea5ae1cea9a713cf43da5c7d5c0&"
+                }
+            }}
+        }
+        sendToWebhook(data)
+        LocalPlayer:Kick("You are not whitelisted.")
+        break
+    end
+end
